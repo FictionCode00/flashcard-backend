@@ -20,7 +20,8 @@ exports.addFlashCard = async (req, res, next) => {
         });
 
         const savedFlashcard = await newFlashcard.save();
-        set.addFlashCard(savedFlashcard._id)
+        
+        set.addFlashcard(savedFlashcard._id,targetLang,sourceLang,req.files['image'] ? req.files['image'][0].location : null)
         await set.save();
         res.status(201).json(savedFlashcard);
     } catch (error) {
