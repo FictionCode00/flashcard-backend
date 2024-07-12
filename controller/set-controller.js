@@ -83,7 +83,7 @@ exports.updateFlashcardOrder = async (req, res) => {
 exports.getUserSetsCards = async (req, res, next) => {
     const { id } = req.params
     try {
-        const sets = await FlashCardSet.find({ user: req.user.id,_id:id })
+        const sets = await FlashCardSet.find({ user: req.user.id,_id:id }).populate('flashcards.flashcard')
         sendResponse(res, sets[0], SUCCESS_STATUS_CODE)
     } catch (error) {
         console.log(error)

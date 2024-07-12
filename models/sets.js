@@ -5,7 +5,7 @@ const FlashcardSetSchema = new mongoose.Schema({
   
   user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   flashcards: [{
-    flashcard: { type: mongoose.Schema.Types.ObjectId, ref: 'flashCard' },
+    flashcard: { type: mongoose.Schema.Types.ObjectId, ref: 'flash_cards' },
     order: { type: Number, required: true },
   }],
   createdAt: { type: Date, default: Date.now },
