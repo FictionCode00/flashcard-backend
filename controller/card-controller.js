@@ -20,7 +20,7 @@ exports.addFlashCard = async (req, res, next) => {
         });
 
         const savedFlashcard = await newFlashcard.save();
-        set.addFlashcard(savedFlashcard._id,targetLang,sourceLang,req.files['image'] ? req.files['image'][0].location : null)
+        set.addFlashcard(savedFlashcard._id)
         await set.save();
         res.status(201).json(savedFlashcard);
     } catch (error) {
@@ -31,11 +31,50 @@ exports.addFlashCard = async (req, res, next) => {
 
 exports.getCards= async(req,res,next)=>{
     try {
-        
         const cards = await flashCard.find({ createdBy: req.user.id });
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
     } catch (error) {
-        console.log(err)
-        next(err)
+        console.log(error)
+        next(error)
+    }
+}
+exports.getsavedCards= async(req,res,next)=>{
+    try {
+        const cards = await flashCard.find();
+        sendResponse(res,cards,SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+exports.getCard= async(req,res,next)=>{
+    try {
+        const { id } = req.params
+
+       const cards = await flashCard.findById(id);
+
+       const next = await flashCard.findOne( { _id: { $gt: id } } )
+       const prev = await flashCard.findOne( { _id: { $lt: id } } );
+       let prevId = null;
+       if(prev){
+            prevId = prev._id
+       }
+       let nextId = null;
+       if(next){
+            nextId = next._id
+       }
+       console.log(next);
+       console.log('hello');
+       console.log(nextId);
+
+    
+
+       let data = {'cards':cards,'prev':prevId,'next':nextId}
+        
+        sendResponse(res,data,SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
     }
 }

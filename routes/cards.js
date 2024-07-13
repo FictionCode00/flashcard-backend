@@ -1,5 +1,5 @@
 var express = require('express');
-const { addFlashCard, getCards } = require('../controller/card-controller');
+const { addFlashCard, getCards,getsavedCards,getCard } = require('../controller/card-controller');
 const { authenticateToken } = require('../middlewares/Authentication');
 const upload = require('../config/bucket-config');
 
@@ -12,5 +12,7 @@ router.post('/add-card',authenticateToken,upload.fields([
   ]) ,addFlashCard)
 
   router.get('/',authenticateToken,getCards)
+  router.get('/get-all-cards',getsavedCards)
+  router.get('/get-card/:id',getCard)
 
 module.exports = router;
