@@ -5,9 +5,9 @@ const FlashCardSet = require("../models/sets");
 
 exports.addFlashCard = async (req, res, next) => {
     try {
-        const { sourceLang, targetLang, sourceText, targetText } = req.body;
+        const { sourceLang, targetLang, sourceText, targetText,setId } = req.body;
        
-        // const set = await FlashCardSet.findById(setId);
+        const set = await FlashCardSet.findById(setId);
         const newFlashcard = new flashCard({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
             sourceLang:"English",
@@ -20,8 +20,8 @@ exports.addFlashCard = async (req, res, next) => {
         });
 
         const savedFlashcard = await newFlashcard.save();
-        // set.addFlashcard(savedFlashcard._id)
-        // await set.save();
+        set.addFlashcard(savedFlashcard._id)
+        await set.save();
         res.status(201).json(savedFlashcard);
     } catch (error) {
         console.log(error)
