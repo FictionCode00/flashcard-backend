@@ -6,10 +6,10 @@ const { AddSet, getUserSets, addCardToSet,getUserSetsCards } = require('../contr
 
 var router = express.Router();
 
-router.post('/add',authenticateToken ,AddSet)
-router.get('/',authenticateToken ,getUserSets)
-router.post('/card/:id',authenticateToken ,addCardToSet)
-router.get('/view-cards/:id',authenticateToken ,getUserSetsCards)
+router.post('/add' ,AddSet)
+router.get('/' ,getUserSets)
+router.post('/card/:id' ,addCardToSet)
+router.get('/view-cards/:id' ,getUserSetsCards)
 
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose");
 
 const FlashcardSchema = new mongoose.Schema({
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User'},
     sourceLang: { type: String, required: true },
     targetLang: { type: String, required: true },
     sourceText: { type: String, required: true },

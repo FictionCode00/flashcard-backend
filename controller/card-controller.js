@@ -5,13 +5,13 @@ const FlashCardSet = require("../models/sets");
 
 exports.addFlashCard = async (req, res, next) => {
     try {
-        const { sourceLang, targetLang, sourceText, targetText,setId } = req.body;
+        const { sourceLang, targetLang, sourceText, targetText } = req.body;
        
-        const set = await FlashCardSet.findById(setId);
+        // const set = await FlashCardSet.findById(setId);
         const newFlashcard = new flashCard({
-            createdBy: req.user.id, // Assuming auth middleware adds user to req
-            sourceLang,
-            targetLang,
+            // createdBy: req.user.id, // Assuming auth middleware adds user to req
+            sourceLang:"English",
+            targetLang:"Spanish",
             sourceText,
             targetText,
             sourceAudio: req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null,
@@ -20,8 +20,8 @@ exports.addFlashCard = async (req, res, next) => {
         });
 
         const savedFlashcard = await newFlashcard.save();
-        set.addFlashcard(savedFlashcard._id)
-        await set.save();
+        // set.addFlashcard(savedFlashcard._id)
+        // await set.save();
         res.status(201).json(savedFlashcard);
     } catch (error) {
         console.log(error)
@@ -73,6 +73,21 @@ exports.getCard= async(req,res,next)=>{
        let data = {'cards':cards,'prev':prevId,'next':nextId}
         
         sendResponse(res,data,SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+
+exports.getFilterCards=async(req,res,next)=>{
+    const {sourceLang,targetLang}=req.body
+    try {
+        const cards = await flashCard.find({
+            sourceLang: { $regex: sourceLang, $options: 'i' },
+            targetLang: { $regex: targetLang, $options: 'i' }
+          })
+        sendResponse(res,cards,SUCCESS_STATUS_CODE)
     } catch (error) {
         console.log(error)
         next(error)
