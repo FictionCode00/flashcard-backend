@@ -2,12 +2,39 @@ const sendResponse = require("../common/response");
 const { SUCCESS_STATUS_CODE } = require("../common/statusCodes");
 const flashCard = require("../models/cards");
 const FlashCardSet = require("../models/sets");
+const UserLimit = require("../models/userlimit");
+
+
+function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+}
+
 
 exports.addFlashCard = async (req, res, next) => {
     try {
         const { sourceLang, targetLang, sourceText, targetText,setId } = req.body;
-       
-        const set = await FlashCardSet.findById(setId);
+        let settId = setId;
+        if(settId == 'new'){
+             const newFlashCardSet = new FlashCardSet({
+            // createdBy: req.user.id, // Assuming auth middleware adds user to req
+            name:"New Set "+makeid(3),
+            user:req.user.id,
+            
+        }); 
+
+        const saveddFlashcard = await newFlashCardSet.save();
+         
+            settId =saveddFlashcard._id
+        }
+        const set = await FlashCardSet.findById(settId);
         const newFlashcard = new flashCard({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
             sourceLang:"English",
@@ -17,7 +44,7 @@ exports.addFlashCard = async (req, res, next) => {
             sourceAudio: req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null,
             targetAudio: req.files['targetAudio'] ? req.files['targetAudio'][0].location : null,
             illustration: req.files['image'] ? req.files['image'][0].location : null,
-        });
+        }); 
 
         const savedFlashcard = await newFlashcard.save();
         set.addFlashcard(savedFlashcard._id)
@@ -50,27 +77,37 @@ exports.getsavedCards= async(req,res,next)=>{
 
 exports.getCard= async(req,res,next)=>{
     try {
-        const { id } = req.params
+       
+        const { cardid, istype } = req.body;
 
-       const cards = await flashCard.findById(id);
 
-       const next = await flashCard.findOne( { _id: { $gt: id } } )
-       const prev = await flashCard.findOne( { _id: { $lt: id } } );
-       let prevId = null;
-       if(prev){
-            prevId = prev._id
-       }
-       let nextId = null;
-       if(next){
-            nextId = next._id
-       }
-       console.log(next);
-       console.log('hello');
-       console.log(nextId);
 
+
+       const cards = await flashCard.findById(cardid);
+
+       if(istype == 1){
+
+
+        const checkPreventry = await UserLimit.find({userId: req.user.id,cardId : cardid}).count();
+
+        if(checkPreventry == 0){
+             try {
+               console.log(istype);
+        const set = new UserLimit({ userId: req.user.id,cardId : cardid  })
+                const dasta = await set.save()
+               
+            } catch (error) {
+                console.log(error)
+                next(error)
+            }
+        }
     
+       }
 
-       let data = {'cards':cards,'prev':prevId,'next':nextId}
+       const checkPreventry = await UserLimit.find({userId: req.user.id}).count();
+
+      let data = {'cards':cards,'isAllowed':checkPreventry}
+       
         
         sendResponse(res,data,SUCCESS_STATUS_CODE)
     } catch (error) {

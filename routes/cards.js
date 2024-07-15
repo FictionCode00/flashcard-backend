@@ -5,7 +5,7 @@ const upload = require('../config/bucket-config');
 
 var router = express.Router();
 
-router.post('/add-card',upload.fields([
+router.post('/add-card',authenticateToken,upload.fields([
     { name: 'sourceAudio', maxCount: 1 },
     { name: 'targetAudio', maxCount: 1 },
     {name:"image",maxCount:1}
@@ -14,6 +14,10 @@ router.post('/add-card',upload.fields([
   router.get('/',getCards)
   router.get('/get-all-cards',getsavedCards)
   router.post('/get-filtered-card',getFilterCards)
-  router.get('/get-card/:id',getCard)
+  router.post('/get-card',authenticateToken,upload.fields([
+    { name: 'sourceAudio', maxCount: 1 },
+    { name: 'targetAudio', maxCount: 1 },
+    {name:"image",maxCount:1}
+  ]) ,getCard)
 
 module.exports = router;

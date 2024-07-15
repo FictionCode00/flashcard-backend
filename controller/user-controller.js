@@ -99,3 +99,19 @@ exports.socialLogin = async (req, res, next) => {
         next(err)
     }
 }
+
+
+exports.createIntent = async (req, res, next) => {
+   
+    const stripe = require('stripe')('sk_test_51NTZLiD15EFB6mA7OdDSLaVcS52FR619qbOdMF8X5QEDmBmr03kqLkdICtR9Kre5wmyXv4laGkoESdW8xmMc69SV00OC5kE8s4');
+
+    
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: 2000,
+      currency: 'usd',
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
+    sendResponse(res, paymentIntent, SUCCESS_STATUS_CODE)
+}
