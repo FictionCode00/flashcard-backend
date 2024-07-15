@@ -37,8 +37,8 @@ exports.addFlashCard = async (req, res, next) => {
         const set = await FlashCardSet.findById(settId);
         const newFlashcard = new flashCard({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
-            sourceLang:"English",
-            targetLang:"Spanish",
+            sourceLang,
+            targetLang,
             sourceText,
             targetText,
             sourceAudio: req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null,
