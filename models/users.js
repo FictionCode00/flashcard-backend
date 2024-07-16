@@ -10,6 +10,7 @@ const UserSchema= new Schema({
     role: { type: String, enum: ['user', 'admin', 'super-admin'], default: 'user' },
     subscriptionStatus: { type: String, enum: ['free', 'paid'], default: 'free' },
     socialId:{type:String,default:''},
+    cardlimit:{type:Number,default:25},
     createdAt: { type: Date, default: Date.now },
 },{timestamps:true})
 

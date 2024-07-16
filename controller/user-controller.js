@@ -115,3 +115,23 @@ exports.createIntent = async (req, res, next) => {
     });
     sendResponse(res, paymentIntent, SUCCESS_STATUS_CODE)
 }
+
+exports.SavePayment = async(req,res,next) =>{
+    //check if user exists or not
+    let user = await User.findById(req.user.id).select('cardlimit');
+
+    if(user){
+        let newLimt = user.cardlimit+25;
+      User.updateOne({ _id: req.user.id }, { $set: {cardlimit: newLimt } }, function(err, res) {
+        if (err) throw err;
+        return res.status(200).send({
+            status:"success",
+        })
+      });
+
+    }
+
+    
+
+}
+

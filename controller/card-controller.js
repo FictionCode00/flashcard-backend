@@ -3,6 +3,7 @@ const { SUCCESS_STATUS_CODE } = require("../common/statusCodes");
 const flashCard = require("../models/cards");
 const FlashCardSet = require("../models/sets");
 const UserLimit = require("../models/userlimit");
+const User = require("../models/users");
 
 
 function makeid(length) {
@@ -80,7 +81,7 @@ exports.getCard= async(req,res,next)=>{
        
         const { cardid, istype } = req.body;
 
-
+    
 
 
        const cards = await flashCard.findById(cardid);
@@ -105,8 +106,17 @@ exports.getCard= async(req,res,next)=>{
        }
 
        const checkPreventry = await UserLimit.find({userId: req.user.id}).count();
+       let isAllowed = 1;
+       let user = await User.findById(req.user.id).select('cardlimit');
+       if(user){
+        if(checkPreventry > user.cardlimit){
 
-      let data = {'cards':cards,'isAllowed':checkPreventry}
+            isAllowed = 0;
+            cards = {};
+        }
+       }
+
+      let data = {'cards':cards,'isAllowed':isAllowed}
        
         
         sendResponse(res,data,SUCCESS_STATUS_CODE)
