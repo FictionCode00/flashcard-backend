@@ -112,10 +112,11 @@ exports.getCard= async(req,res,next)=>{
         if(checkPreventry > user.cardlimit){
 
             isAllowed = 0;
-            cards = {};
+            
         }
        }
 
+      // let data = {'cards':cards,'isAllowed':isAllowed+' - '+checkPreventry+' - '+user.cardlimit}
       let data = {'cards':cards,'isAllowed':isAllowed}
        
         
