@@ -59,17 +59,19 @@ exports.addCardToSet = async (req, res, next) => {
     }
 }
 
-exports.updateFlashcardOrder = async (req, res) => {
+exports.updateFlashcardOrder = async (req, res, next) => {
     try {
-        const { setId } = req.params;
-        const { newOrder } = req.body;  // Array of { flashcardId, order }
+        const { id } = req.params;
+        const { data } = req.body;  // Array of { flashcardId, order }
 
-        const set = await FlashCardSet.findById(setId);
+        
+
+        const set = await FlashCardSet.findById(id);
         if (!set) {
             return sendResponse(res, { message: 'Flashcard set not found' }, NOT_FOUND_STATUS_CODE);
         }
 
-        set.updateOrder(newOrder);
+        set.updateOrder(req.body);
         await set.save();
 
         sendResponse(res, { message: 'Flashcard order updated successfully', set }, SUCCESS_STATUS_CODE);
@@ -83,7 +85,7 @@ exports.updateFlashcardOrder = async (req, res) => {
 exports.getUserSetsCards = async (req, res, next) => {
     const { id } = req.params
     try {
-        const sets = await FlashCardSet.find({ user: req.user.id,_id:id }).populate('flashcards.flashcard')
+        const sets = await FlashCardSet.find({ user: req.user.id,_id:id }).populate('flashcards.flashcard');
         sendResponse(res, sets[0], SUCCESS_STATUS_CODE)
     } catch (error) {
         console.log(error)
