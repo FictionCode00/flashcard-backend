@@ -103,11 +103,10 @@ exports.socialLogin = async (req, res, next) => {
 
 exports.createIntent = async (req, res, next) => {
    
-    const stripe = require('stripe')('sk_test_51NTZLiD15EFB6mA7OdDSLaVcS52FR619qbOdMF8X5QEDmBmr03kqLkdICtR9Kre5wmyXv4laGkoESdW8xmMc69SV00OC5kE8s4');
-
+    const stripe = require('stripe')('sk_test_5mJkRP6GZO9TNzKunanIIMvF');
     
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: 2000,
+      amount: 500,
       currency: 'usd',
       automatic_payment_methods: {
         enabled: true,
@@ -118,19 +117,26 @@ exports.createIntent = async (req, res, next) => {
 
 exports.SavePayment = async(req,res,next) =>{
     //check if user exists or not
-    let user = await User.findById(req.user.id).select('cardlimit');
+    let usder = await User.findById(req.user.id);
+   const { payent_intent } = req.body;
 
-    if(user){
-        let newLimt = user.cardlimit+25;
-      User.updateOne({ _id: req.user.id }, { $set: {cardlimit: newLimt } }, function(err, res) {
-        if (err) throw err;
-        return res.status(200).send({
-            status:"success",
-        })
-      });
-
+   // console.log(req.body);
+   // return
+    if(usder){
+        if(usder.payent_intent == '' && usder.payent_intent != payent_intent){
+            let newLimt = parseInt(usder.cardlimit)+25;
+            usder.payent_intent = payent_intent;
+            usder.cardlimit = newLimt;
+            usder.save();
+           sendResponse(res, usder, SUCCESS_STATUS_CODE)
+        }else{
+            sendResponse(res, {}, ERROR_STATUS_CODE)
+        }
+        
+    }else{
+        sendResponse(res, {}, ERROR_STATUS_CODE)
+        
     }
-
     
 
 }

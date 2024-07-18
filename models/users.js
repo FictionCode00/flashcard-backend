@@ -11,6 +11,7 @@ const UserSchema= new Schema({
     subscriptionStatus: { type: String, enum: ['free', 'paid'], default: 'free' },
     socialId:{type:String,default:''},
     cardlimit:{type:Number,default:25},
+    payent_intent:{type:String,default:''},
     createdAt: { type: Date, default: Date.now },
 },{timestamps:true})
 
@@ -20,6 +21,14 @@ UserSchema.plugin(uniqueValidator,{message:"This email is already exists."})
 UserSchema.methods.comparePassword= async function(password,dbPassword){
    return await bcrypt.compare(password,dbPassword)
 }
+// Method to update the order of flashcards
+UserSchema.methods.updateLimit = function(userId,limit) {
+  // newOrder should be an array of { flashcardId, order }
+  const udjd = this._id.find(f => f._id.toString() === userId);
+ if (udjd) {
+   udjd.cardlimit = limit;
+ }
+};
 
 const User= mongoose.model('users',UserSchema)
 
