@@ -18,7 +18,6 @@ exports.AddSet = async (req, res, next) => {
 
 exports.getUserSets = async (req, res, next) => {
     try {
-
         const sets = await FlashCardSet.find({ user: req.user.id })
         sendResponse(res, sets, SUCCESS_STATUS_CODE)
     } catch (error) {

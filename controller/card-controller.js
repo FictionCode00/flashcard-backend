@@ -26,7 +26,7 @@ exports.addFlashCard = async (req, res, next) => {
         if(settId == 'new'){
              const newFlashCardSet = new FlashCardSet({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
-            name:"New Set "+makeid(3),
+            name:sourceLang+' - '+targetLang+' 1-100',
             user:req.user.id,
             
         }); 
@@ -107,7 +107,9 @@ exports.getCard= async(req,res,next)=>{
 
        const checkPreventry = await UserLimit.find({userId: req.user.id}).count();
        let isAllowed = 1;
+
        let user = await User.findById(req.user.id).select('cardlimit');
+       console.log(user);
        if(user){
         if(checkPreventry > user.cardlimit){
 
