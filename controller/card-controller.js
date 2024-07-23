@@ -21,7 +21,7 @@ function makeid(length) {
 
 exports.addFlashCard = async (req, res, next) => {
     try {
-        const { sourceLang, targetLang, sourceText, targetText,setId } = req.body;
+        const { sourceLang, targetLang, sourceText, targetText,setId,isprevimg,issourceAudio,istargetAudio } = req.body;
         let settId = setId;
         if(settId == 'new'){
              const newFlashCardSet = new FlashCardSet({
@@ -36,15 +36,31 @@ exports.addFlashCard = async (req, res, next) => {
             settId =saveddFlashcard._id
         }
         const set = await FlashCardSet.findById(settId);
+        let imgval = req.files['image'] ? req.files['image'][0].location : null;
+        if(isprevimg != ''){
+            imgval = isprevimg;
+        }
+
+        let sourceAudioval = req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null;
+        if(issourceAudio != ''){
+            sourceAudioval = issourceAudio;
+        }
+
+
+        let targetAudioval = req.files['targetAudio'] ? req.files['targetAudio'][0].location : null;
+        if(istargetAudio != ''){
+            targetAudioval = istargetAudio;
+        }
+
         const newFlashcard = new flashCard({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
             sourceLang,
             targetLang,
             sourceText,
             targetText,
-            sourceAudio: req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null,
-            targetAudio: req.files['targetAudio'] ? req.files['targetAudio'][0].location : null,
-            illustration: req.files['image'] ? req.files['image'][0].location : null,
+            sourceAudio: sourceAudioval,
+            targetAudio: targetAudioval,
+            illustration: imgval,
         }); 
 
         const savedFlashcard = await newFlashcard.save();
@@ -119,7 +135,12 @@ exports.getCard= async(req,res,next)=>{
        }
 
       // let data = {'cards':cards,'isAllowed':isAllowed+' - '+checkPreventry+' - '+user.cardlimit}
-      let data = {'cards':cards,'isAllowed':isAllowed}
+
+      let checkSet =  await FlashCardSet.findOne({ 
+   "flashcards.flashcard": cards._id
+}); 
+     
+      let data = {'cards':cards,'isAllowed':isAllowed,'setid':checkSet._id}
        
         
         sendResponse(res,data,SUCCESS_STATUS_CODE)
