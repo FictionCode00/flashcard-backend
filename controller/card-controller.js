@@ -65,10 +65,10 @@ exports.addFlashCard = async (req, res, next) => {
 
         const savedFlashcard = await newFlashcard.save();
         set.addFlashcard(savedFlashcard._id)
-        await set.save();
+        await set.save(); 
         res.status(201).json(savedFlashcard);
     } catch (error) {
-        console.log(error)
+        console.log(error)  
         next(error);
     }
 };
