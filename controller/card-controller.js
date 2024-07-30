@@ -1,5 +1,5 @@
 const sendResponse = require("../common/response");
-const { SUCCESS_STATUS_CODE } = require("../common/statusCodes");
+const { SUCCESS_STATUS_CODE,NOT_FOUND_STATUS_CODE } = require("../common/statusCodes");
 const flashCard = require("../models/cards");
 const FlashCardSet = require("../models/sets");
 const UserLimit = require("../models/userlimit");
@@ -67,6 +67,80 @@ exports.addFlashCard = async (req, res, next) => {
         set.addFlashcard(savedFlashcard._id)
         await set.save(); 
         res.status(201).json(savedFlashcard);
+    } catch (error) {
+        console.log(error)  
+        next(error);
+    }
+};
+
+
+exports.editFlashCard = async (req, res, next) => {
+    try {
+        const { cardId,sourceLang, targetLang, sourceText, targetText,setId,isprevimg,issourceAudio,istargetAudio } = req.body;
+        let settId = setId;
+        if(settId == 'new'){
+             const newFlashCardSet = new FlashCardSet({
+            // createdBy: req.user.id, // Assuming auth middleware adds user to req
+            name:sourceLang+' - '+targetLang+' 1-100',
+            user:req.user.id,
+            
+        }); 
+        const saveddFlashcard = await newFlashCardSet.save();
+         
+            settId =saveddFlashcard._id
+        }
+        const set = await FlashCardSet.findById(settId);
+        let imgval = req.files['image'] ? req.files['image'][0].location : null;
+        if(isprevimg != ''){
+            imgval = isprevimg;
+        }
+
+        let sourceAudioval = req.files['sourceAudio'] ? req.files['sourceAudio'][0].location : null;
+        if(issourceAudio != ''){
+            sourceAudioval = issourceAudio;
+        }
+
+
+        let targetAudioval = req.files['targetAudio'] ? req.files['targetAudio'][0].location : null;
+        if(istargetAudio != ''){
+            targetAudioval = istargetAudio;
+        }
+
+         let flscard = await flashCard.findById(cardId);
+
+        if (!flscard) {
+            return sendResponse(res, { message: 'Flashcard not found' }, NOT_FOUND_STATUS_CODE);
+        }
+
+         flscard.sourceLang = sourceLang;
+         flscard.targetLang = targetLang;
+         flscard.sourceText = sourceText;
+         flscard.targetText = targetText;
+         flscard.sourceAudio = sourceAudioval;
+         flscard.targetAudio = targetAudioval;
+         flscard.illustration = imgval;
+         flscard.save();
+       
+       
+
+        if (!set) {
+            return sendResponse(res, { message: 'Flashcard set not found' }, NOT_FOUND_STATUS_CODE);
+        }
+
+         
+
+        // Check if the flashcard is already in the set
+        const existingCard = set.flashcards.find(card => card.flashcard.toString() === cardId);
+        if (existingCard) {
+           
+        }else{
+            set.addFlashcard(cardId);
+            await set.save();
+        }
+
+        
+
+        res.status(201).json(flscard);
     } catch (error) {
         console.log(error)  
         next(error);
@@ -159,6 +233,36 @@ exports.getFilterCards=async(req,res,next)=>{
             targetLang: { $regex: targetLang, $options: 'i' }
           })
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
+    }
+}
+
+
+exports.DeleteCard= async(req,res,next)=>{
+    const {cardid,setid}=req.body
+
+
+    try {
+       
+      
+       await flashCard.findByIdAndDelete(cardid);
+
+       const set = await FlashCardSet.findById(setid);
+        // Check if the flashcard is already in the set
+        if (!set) {
+            return sendResponse(res, { message: 'Flashcard set not found' }, NOT_FOUND_STATUS_CODE);
+        }
+        // Check if the flashcard is already in the set
+       await FlashCardSet.findOneAndUpdate(
+        { _id: setid },
+        { $pull: { flashcards: { flashcard: cardid } } },
+        { safe: true, multi: false }
+      );
+        
+        sendResponse(res,set,SUCCESS_STATUS_CODE)
+
     } catch (error) {
         console.log(error)
         next(error)
