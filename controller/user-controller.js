@@ -1,5 +1,5 @@
 const sendResponse = require("../common/response");
-const { SUCCESS_STATUS_CODE, ERROR_STATUS_CODE } = require("../common/statusCodes");
+const { SUCCESS_STATUS_CODE, ERROR_STATUS_CODE, NOT_FOUND_STATUS_CODE } = require("../common/statusCodes");
 const User = require("../models/users");
 const CustomError = require("../utils/customError");
 const hashingPassword = require("../utils/password-hashing");
@@ -137,7 +137,36 @@ exports.SavePayment = async(req,res,next) =>{
         sendResponse(res, {}, ERROR_STATUS_CODE)
         
     }
-    
-
 }
 
+
+exports.getUsers = async (req, res, next) => {
+    try {
+        const users = await User.find({isSuperAdmin : 0})
+        sendResponse(res, users, SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
+
+    }
+}
+
+exports.setAdmin = async (req, res, next) => {
+    try {
+        const { userId,isAdmin } = req.body;
+        const userss = await User.findById(userId);
+        if (!userss) {
+            return sendResponse(res, { message: 'User not found' }, NOT_FOUND_STATUS_CODE);
+        }
+        userss.isAdmin = isAdmin;
+        userss.save();
+
+        const users = await User.find();
+        
+        sendResponse(res, users, SUCCESS_STATUS_CODE)
+    } catch (error) {
+        console.log(error)
+        next(error)
+
+    }
+}

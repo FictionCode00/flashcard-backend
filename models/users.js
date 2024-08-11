@@ -12,6 +12,8 @@ const UserSchema= new Schema({
     socialId:{type:String,default:''},
     cardlimit:{type:Number,default:25},
     payent_intent:{type:String,default:''},
+    isAdmin:{type:Number,default:0},
+    isSuperAdmin:{type:Number,default:0},
     createdAt: { type: Date, default: Date.now },
 },{timestamps:true})
 
