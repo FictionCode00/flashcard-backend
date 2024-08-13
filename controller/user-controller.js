@@ -59,6 +59,35 @@ exports.Signin = async(req,res,next) =>{
     })
 
 }
+exports.adminSignin = async(req,res,next) =>{
+    let {email , password}=req.body
+ 
+    //check for empty fields in the request body
+    if(!email ||!password){
+        const error= new CustomError("Please provide email and password",400)
+        return next(error)
+    }
+
+    //check if user exists or not
+    let user = await User.findOne({email:email,isSuperAdmin:1}).select('+password')
+
+
+    if(!user || !(await user.comparePassword(password,user.password))){
+        const error= new CustomError("Invalid email and password",400)
+        return next(error)
+    }
+
+    let token =userToken(user._id)
+    const data = user.toObject()
+    delete data['password']
+   
+    return res.status(200).send({
+        status:"success",
+        token:token,
+        data: data
+    })
+
+}
 
 exports.socialLogin = async (req, res, next) => {
     let { email, socialId } = req.body

@@ -1,11 +1,12 @@
 var express = require('express');
-const { Signup, Signin, socialLogin,createIntent,SavePayment,getUsers,setAdmin } = require('../controller/user-controller');
+const { Signup, Signin, socialLogin,createIntent,SavePayment,getUsers,setAdmin,adminSignin } = require('../controller/user-controller');
 const { authenticateToken } = require('../middlewares/Authentication');
 
 var router = express.Router();
 
 router.post('/signup',Signup)
 router.post('/login',Signin)
+router.post('/admin-login',adminSignin)
 router.post('/social-login',socialLogin)
 router.post('/get-users',getUsers)
 router.post('/save-payment',authenticateToken,SavePayment)
