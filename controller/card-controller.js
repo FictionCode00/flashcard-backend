@@ -234,7 +234,7 @@ exports.getCard= async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards.sourceAudio = 'http://localhost:8803/saudio/soutput.mp3';
+                  cards.sourceAudio = 'https://test.flashlingua.cards/saudio/soutput.mp3';
              }
               if(targetfileExt == 'ogg'){
                 var ffmpeg = require('fluent-ffmpeg')
@@ -251,7 +251,7 @@ exports.getCard= async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards.targetAudio = 'http://localhost:8803/taudio/toutput.mp3';
+                  cards.targetAudio = 'https://test.flashlingua.cards/taudio/toutput.mp3';
              }
 
       
@@ -297,7 +297,7 @@ exports.getFilterCards=async(req,res,next)=>{
                 .on('close', () => console.log('Audio recorder closed'))
                 .on('end', () => console.log('Audio Transcoding succeeded !'))
                 .pipe(outStream, { end: true });
-                cards[i]['sourceAudio'] = 'http://localhost:8803/saudio/output_'+i+'.mp3';
+                cards[i]['sourceAudio'] = 'https://test.flashlingua.cards/saudio/output_'+i+'.mp3';
             }
             if(targetfileExt == 'ogg'){
                   var ffmpeg = require('fluent-ffmpeg')
@@ -314,7 +314,7 @@ exports.getFilterCards=async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards[i]['targetAudio'] = 'http://localhost:8803/taudio/output_'+i+'.mp3';
+                  cards[i]['targetAudio'] = 'https://test.flashlingua.cards/taudio/output_'+i+'.mp3';
             }
         }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
