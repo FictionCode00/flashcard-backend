@@ -215,6 +215,9 @@ exports.getCard= async(req,res,next)=>{
       let checkSet =  await FlashCardSet.findOne({ 
    "flashcards.flashcard": cards._id
 }); 
+ var http = require('http');
+var url = require('url') ;
+      var hostname = req.headers.host; // hostname = 'localhost:8080'
 
       const sourcefileExt = get_url_extension(cards.sourceAudio);
             const targetfileExt = get_url_extension(cards.targetAudio);
@@ -234,7 +237,7 @@ exports.getCard= async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards.sourceAudio = 'https://test.flashlingua.cards/saudio/soutput.mp3';
+                  cards.sourceAudio = 'https://' + hostname+'/api/saudio/soutput.mp3';
              }
               if(targetfileExt == 'ogg'){
                 var ffmpeg = require('fluent-ffmpeg')
@@ -251,7 +254,7 @@ exports.getCard= async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards.targetAudio = 'https://test.flashlingua.cards/taudio/toutput.mp3';
+                  cards.targetAudio = 'https://' + hostname+'/api/taudio/toutput.mp3';
              }
 
       
@@ -270,6 +273,10 @@ exports.getCard= async(req,res,next)=>{
 
 
 exports.getFilterCards=async(req,res,next)=>{
+    var http = require('http');
+var url = require('url') ;
+      var hostname = req.headers.host; // hostname = 'localhost:8080'
+
     const {sourceLang,targetLang}=req.body
     try {
         let cards = await flashCard.find({
@@ -297,7 +304,7 @@ exports.getFilterCards=async(req,res,next)=>{
                 .on('close', () => console.log('Audio recorder closed'))
                 .on('end', () => console.log('Audio Transcoding succeeded !'))
                 .pipe(outStream, { end: true });
-                cards[i]['sourceAudio'] = 'https://test.flashlingua.cards/saudio/output_'+i+'.mp3';
+                cards[i]['sourceAudio'] = 'https://' + hostname+'/api/saudio/output_'+i+'.mp3';
             }
             if(targetfileExt == 'ogg'){
                   var ffmpeg = require('fluent-ffmpeg')
@@ -314,7 +321,7 @@ exports.getFilterCards=async(req,res,next)=>{
                   .on('close', () => console.log('Audio recorder closed'))
                   .on('end', () => console.log('Audio Transcoding succeeded !'))
                   .pipe(outStream, { end: true });
-                  cards[i]['targetAudio'] = 'https://test.flashlingua.cards/taudio/output_'+i+'.mp3';
+                  cards[i]['targetAudio'] = 'https://' + hostname+'/api/taudio/output_'+i+'.mp3';
             }
         }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
