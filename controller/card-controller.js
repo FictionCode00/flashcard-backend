@@ -272,7 +272,7 @@ exports.getCard= async(req,res,next)=>{
 exports.getFilterCards=async(req,res,next)=>{
     const {sourceLang,targetLang}=req.body
     try {
-        const cards = await flashCard.find({
+        let cards = await flashCard.find({
             sourceLang: { $regex: sourceLang, $options: 'i' },
             targetLang: { $regex: targetLang, $options: 'i' }
           })
