@@ -273,10 +273,10 @@ var url = require('url') ;
 
 
 exports.getFilterCards=async(req,res,next)=>{
+    
     var http = require('http');
-var url = require('url') ;
-      var hostname = req.headers.host; // hostname = 'localhost:8080'
-
+    var url = require('url') ;
+    var hostname = req.headers.host; // hostname = 'localhost:8080'
     const {sourceLang,targetLang}=req.body
     try {
         let cards = await flashCard.find({
@@ -290,38 +290,10 @@ var url = require('url') ;
             const targetfileExt = get_url_extension(cards[i]['targetAudio']);
 
             if(sourcefileExt == 'ogg'){
-                var ffmpeg = require('fluent-ffmpeg')
-                , fs = require('fs')
-                ffmpeg.setFfmpegPath(ffmpegPath)
-                var outStream = fs.createWriteStream('./saudio/output_'+i+'.mp3');
-
-                ffmpeg()
-                .input(cards[i]['sourceAudio'])
-                .audioQuality(96)
-                .toFormat("mp3")
-                .on('error', error => console.log(`Encoding Error: ${error.message}`))
-                .on('exit', () => console.log('Audio recorder exited'))
-                .on('close', () => console.log('Audio recorder closed'))
-                .on('end', () => console.log('Audio Transcoding succeeded !'))
-                .pipe(outStream, { end: true });
-                cards[i]['sourceAudio'] = 'https://' + hostname+'/api/saudio/output_'+i+'.mp3';
+                await processCard(cards[i], i,1,hostname);
             }
             if(targetfileExt == 'ogg'){
-                  var ffmpeg = require('fluent-ffmpeg')
-                  , fs = require('fs')
-                  ffmpeg.setFfmpegPath(ffmpegPath)
-                 var outStream = fs.createWriteStream('./taudio/output_'+i+'.mp3');
-
-                 ffmpeg()
-                  .input(cards[i]['targetAudio'])
-                  .audioQuality(96)
-                  .toFormat("mp3")
-                  .on('error', error => console.log(`Encoding Error: ${error.message}`))
-                  .on('exit', () => console.log('Audio recorder exited'))
-                  .on('close', () => console.log('Audio recorder closed'))
-                  .on('end', () => console.log('Audio Transcoding succeeded !'))
-                  .pipe(outStream, { end: true });
-                  cards[i]['targetAudio'] = 'https://' + hostname+'/api/taudio/output_'+i+'.mp3';
+                await processCard(cards[i], i,2,hostname);
             }
         }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
@@ -330,6 +302,47 @@ var url = require('url') ;
         next(error)
     }
 }
+
+function processAudio(inputFile, outputFile) {
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputFile)
+      .audioQuality(96)
+      .toFormat("mp3")
+      .on('error', error => {
+        console.error('Encoding Error: ${error.message}');
+        reject(error);
+      })
+      .on('end', () => {
+        console.log('Audio Transcoding succeeded !');
+        resolve();
+      })
+      .save(outputFile);
+  });
+}
+
+async function processCard(card, index,idd,hostname) {
+    
+    if(idd == 1){
+        const outputFile = './taudio/output_${index}.mp3';
+        try {
+        await processAudio(card.sourceAudio, outputFile);
+        card.targetAudio = 'https://${hostname}/api/saudio/output_${index}.mp3';
+        } catch (error) {
+        console.error('Failed to process audio for card ${index}', error);
+        }
+    }else{
+        const outputFile = './taudio/output_${index}.mp3';
+        try {
+        await processAudio(card.targetAudio, outputFile);
+        card.targetAudio = 'https://${hostname}/api/taudio/output_${index}.mp3';
+        } catch (error) {
+        console.error('Failed to process audio for card ${index}:', error);
+        }
+    }
+  
+}
+
+
 
 function get_url_extension( url ) {
     return url.split(/[#?]/)[0].split('.').pop().trim();
