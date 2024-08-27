@@ -4,6 +4,8 @@ const flashCard = require("../models/cards");
 const FlashCardSet = require("../models/sets");
 const UserLimit = require("../models/userlimit");
 const User = require("../models/users");
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
+
 
 
 function makeid(length) {
@@ -60,7 +62,7 @@ exports.addFlashCard = async (req, res, next) => {
             targetText,
             sourceAudio: sourceAudioval,
             targetAudio: targetAudioval,
-            illustration: imgval,
+            illustration: imgval
         }); 
 
         const savedFlashcard = await newFlashcard.save();
@@ -174,7 +176,7 @@ exports.getCard= async(req,res,next)=>{
     
 
 
-       const cards = await flashCard.findById(cardid);
+       let cards = await flashCard.findById(cardid);
 
        if(istype == 1){
 
@@ -213,6 +215,48 @@ exports.getCard= async(req,res,next)=>{
       let checkSet =  await FlashCardSet.findOne({ 
    "flashcards.flashcard": cards._id
 }); 
+
+      const sourcefileExt = get_url_extension(cards.sourceAudio);
+            const targetfileExt = get_url_extension(cards.targetAudio);
+
+             if(sourcefileExt == 'ogg'){
+                var ffmpeg = require('fluent-ffmpeg')
+                  , fs = require('fs')
+                  ffmpeg.setFfmpegPath(ffmpegPath)
+                 var outStream = fs.createWriteStream('./saudio/soutput.mp3');
+
+                 ffmpeg()
+                  .input(cards.sourceAudio)
+                  .audioQuality(96)
+                  .toFormat("mp3")
+                  .on('error', error => console.log(`Encoding Error: ${error.message}`))
+                  .on('exit', () => console.log('Audio recorder exited'))
+                  .on('close', () => console.log('Audio recorder closed'))
+                  .on('end', () => console.log('Audio Transcoding succeeded !'))
+                  .pipe(outStream, { end: true });
+                  cards.sourceAudio = 'http://localhost:8803/saudio/soutput.mp3';
+             }
+              if(targetfileExt == 'ogg'){
+                var ffmpeg = require('fluent-ffmpeg')
+                  , fs = require('fs')
+                  ffmpeg.setFfmpegPath(ffmpegPath)
+                 var outStream = fs.createWriteStream('./taudio/toutput.mp3');
+
+                 ffmpeg()
+                  .input(cards.targetAudio)
+                  .audioQuality(96)
+                  .toFormat("mp3")
+                  .on('error', error => console.log(`Encoding Error: ${error.message}`))
+                  .on('exit', () => console.log('Audio recorder exited'))
+                  .on('close', () => console.log('Audio recorder closed'))
+                  .on('end', () => console.log('Audio Transcoding succeeded !'))
+                  .pipe(outStream, { end: true });
+                  cards.targetAudio = 'http://localhost:8803/taudio/toutput.mp3';
+             }
+
+      
+
+
      
       let data = {'cards':cards,'isAllowed':isAllowed,'setid':checkSet._id}
        
@@ -232,11 +276,56 @@ exports.getFilterCards=async(req,res,next)=>{
             sourceLang: { $regex: sourceLang, $options: 'i' },
             targetLang: { $regex: targetLang, $options: 'i' }
           })
+
+        for (var i = 0; i < cards.length; i++) {
+
+            const sourcefileExt = get_url_extension(cards[i]['sourceAudio']);
+            const targetfileExt = get_url_extension(cards[i]['targetAudio']);
+
+            if(sourcefileExt == 'ogg'){
+                var ffmpeg = require('fluent-ffmpeg')
+                , fs = require('fs')
+                ffmpeg.setFfmpegPath(ffmpegPath)
+                var outStream = fs.createWriteStream('./saudio/output_'+i+'.mp3');
+
+                ffmpeg()
+                .input(cards[i]['sourceAudio'])
+                .audioQuality(96)
+                .toFormat("mp3")
+                .on('error', error => console.log(`Encoding Error: ${error.message}`))
+                .on('exit', () => console.log('Audio recorder exited'))
+                .on('close', () => console.log('Audio recorder closed'))
+                .on('end', () => console.log('Audio Transcoding succeeded !'))
+                .pipe(outStream, { end: true });
+                cards[i]['sourceAudio'] = 'http://localhost:8803/saudio/output_'+i+'.mp3';
+            }
+            if(targetfileExt == 'ogg'){
+                  var ffmpeg = require('fluent-ffmpeg')
+                  , fs = require('fs')
+                  ffmpeg.setFfmpegPath(ffmpegPath)
+                 var outStream = fs.createWriteStream('./taudio/output_'+i+'.mp3');
+
+                 ffmpeg()
+                  .input(cards[i]['targetAudio'])
+                  .audioQuality(96)
+                  .toFormat("mp3")
+                  .on('error', error => console.log(`Encoding Error: ${error.message}`))
+                  .on('exit', () => console.log('Audio recorder exited'))
+                  .on('close', () => console.log('Audio recorder closed'))
+                  .on('end', () => console.log('Audio Transcoding succeeded !'))
+                  .pipe(outStream, { end: true });
+                  cards[i]['targetAudio'] = 'http://localhost:8803/taudio/output_'+i+'.mp3';
+            }
+        }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
     } catch (error) {
         console.log(error)
         next(error)
     }
+}
+
+function get_url_extension( url ) {
+    return url.split(/[#?]/)[0].split('.').pop().trim();
 }
 
 

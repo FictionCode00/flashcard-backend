@@ -20,6 +20,8 @@ const PORT = 8803
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+app.use('/saudio', express.static(process.cwd() + '/saudio'))
+app.use('/taudio', express.static(process.cwd() + '/taudio'))
 
 app.use(cors())
 app.use(logger('dev'));
