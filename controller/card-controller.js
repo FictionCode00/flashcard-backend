@@ -222,8 +222,8 @@ var url = require('url') ;
     var fileAccessUrl = 'https://'+hostname+'/api';
        const fs = require('fs')
 
-            const spath = './saudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
-            const tpath = './taudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
+            const spath = './api/saudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
+            const tpath = './api/taudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
 
       const sourcefileExt = get_url_extension(cards.sourceAudio);
             const targetfileExt = get_url_extension(cards.targetAudio);
@@ -275,13 +275,15 @@ exports.getFilterCards=async(req,res,next)=>{
             const targetfileExt = get_url_extension(cards[i]['targetAudio']);
            const fs = require('fs')
 
-            const spath = './saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
-            const tpath = './taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+            const spath = './api/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+            const tpath = './api/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+
+            console.log();
 
             if(sourcefileExt == 'ogg' && fs.existsSync(spath)){
                 cards[i].sourceAudio = fileAccessUrl+'/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
             }
-            if(targetfileExt == 'ogg' && fs.existsSync(spath)){
+            if(targetfileExt == 'ogg' && fs.existsSync(tpath)){
                 cards[i].targetAudio = fileAccessUrl+'/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
             }
         }
