@@ -228,10 +228,10 @@ var url = require('url') ;
       const sourcefileExt = get_url_extension(cards.sourceAudio);
             const targetfileExt = get_url_extension(cards.targetAudio);
 
-             if(sourcefileExt == 'ogg' && fs.existsSync(spath)){
+             if(sourcefileExt == 'ogg'){
                 cards.sourceAudio = fileAccessUrl+'/saudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
              }
-             if(targetfileExt == 'ogg' && fs.existsSync(tpath)){
+             if(targetfileExt == 'ogg'){
                 cards.targetAudio = fileAccessUrl+'/taudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
              }
 
@@ -270,22 +270,25 @@ exports.getFilterCards=async(req,res,next)=>{
           })
 
         for (var i = 0; i < cards.length; i++) {
+            if(cards[i]['sourceAudio'] != null && cards[i]['targetAudio'] != null){
+                 const sourcefileExt = get_url_extension(cards[i]['sourceAudio']);
+                const targetfileExt = get_url_extension(cards[i]['targetAudio']);
+               const fs = require('fs')
 
-            const sourcefileExt = get_url_extension(cards[i]['sourceAudio']);
-            const targetfileExt = get_url_extension(cards[i]['targetAudio']);
-           const fs = require('fs')
+                const spath = './api/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+                const tpath = './api/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
 
-            const spath = './api/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
-            const tpath = './api/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+                console.log(spath);
 
-            console.log();
-
-            if(sourcefileExt == 'ogg' && fs.existsSync(spath)){
-                cards[i].sourceAudio = fileAccessUrl+'/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
+                if(sourcefileExt == 'ogg'){
+                    cards[i].sourceAudio = fileAccessUrl+'/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+                }
+                if(targetfileExt == 'ogg'){
+                    cards[i].targetAudio = fileAccessUrl+'/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+                }
             }
-            if(targetfileExt == 'ogg' && fs.existsSync(tpath)){
-                cards[i].targetAudio = fileAccessUrl+'/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
-            }
+
+           
         }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
     } catch (error) {
