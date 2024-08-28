@@ -4,7 +4,7 @@ const flashCard = require("../models/cards");
 const FlashCardSet = require("../models/sets");
 const UserLimit = require("../models/userlimit");
 const User = require("../models/users");
-const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
+//const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path
 
 
 
@@ -218,18 +218,21 @@ exports.getCard= async(req,res,next)=>{
  var http = require('http');
 var url = require('url') ;
       var hostname = req.headers.host; // hostname = 'localhost:8080'
+      //var fileAccessUrl = 'http://localhost:8803';
+    var fileAccessUrl = 'https://'+hostname+'/api';
+       const fs = require('fs')
+
+            const spath = './saudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
+            const tpath = './taudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
 
       const sourcefileExt = get_url_extension(cards.sourceAudio);
             const targetfileExt = get_url_extension(cards.targetAudio);
 
-             if(sourcefileExt == 'ogg'){
-                const newsFile = await processCard(cards, i,1,hostname);
-                cards.sourceAudio = newsFile;
-                
+             if(sourcefileExt == 'ogg' && fs.existsSync(spath)){
+                cards.sourceAudio = fileAccessUrl+'/saudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
              }
-              if(targetfileExt == 'ogg'){
-                const newtFile = await processCard(cards, i,2,hostname);
-                cards.targetAudio = newtFile;
+             if(targetfileExt == 'ogg' && fs.existsSync(tpath)){
+                cards.targetAudio = fileAccessUrl+'/taudio/output_'+cards.sourceLang+'_'+cards.targetLang+'_'+cards._id+'.mp3';
              }
 
       
@@ -252,6 +255,13 @@ exports.getFilterCards=async(req,res,next)=>{
     var http = require('http');
     var url = require('url') ;
     var hostname = req.headers.host; // hostname = 'localhost:8080'
+    var http = require('http');
+    var url = require('url') ;
+    var hostname = req.headers.host; // hostname = 'localhost:8080'
+   // var fileAccessUrl = 'http://localhost:8803';
+    var fileAccessUrl = 'https://'+hostname+'/api';
+
+
     const {sourceLang,targetLang}=req.body
     try {
         let cards = await flashCard.find({
@@ -263,14 +273,16 @@ exports.getFilterCards=async(req,res,next)=>{
 
             const sourcefileExt = get_url_extension(cards[i]['sourceAudio']);
             const targetfileExt = get_url_extension(cards[i]['targetAudio']);
+           const fs = require('fs')
 
-            if(sourcefileExt == 'ogg'){
-               const newsFile =  await processCard(cards[i], i,1,hostname);
-               cards[i].sourceAudio = newsFile;
+            const spath = './saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+            const tpath = './taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+cards[i]._id+'.mp3';
+
+            if(sourcefileExt == 'ogg' && fs.existsSync(spath)){
+                cards[i].sourceAudio = fileAccessUrl+'/saudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
             }
-            if(targetfileExt == 'ogg'){
-                const newtFile = processCard(cards[i], i,2,hostname);
-                cards[i].targetAudio = newtFile;
+            if(targetfileExt == 'ogg' && fs.existsSync(spath)){
+                cards[i].targetAudio = fileAccessUrl+'/taudio/output_'+cards[i].sourceLang+'_'+cards[i].targetLang+'_'+i+'.mp3';
             }
         }
         sendResponse(res,cards,SUCCESS_STATUS_CODE)
@@ -279,50 +291,7 @@ exports.getFilterCards=async(req,res,next)=>{
         next(error)
     }
 }
-var ffmpeg = require('fluent-ffmpeg')
-var fs = require('fs')
-ffmpeg.setFfmpegPath(ffmpegPath)
-function processAudio(inputFile, outputFile) {
-  return new Promise((resolve, reject) => {
 
-    ffmpeg(inputFile)
-      .audioQuality(96)
-      .toFormat("mp3")
-      .on('error', error => {
-        console.error('Encoding Error: ${error.message}');
-        reject(error);
-      })
-      .on('end', () => {
-        console.log('Audio Transcoding succeeded !');
-        resolve();
-      })
-      .save(outputFile);
-  });
-}
-
-async function processCard(card, index,idd,hostname) {
-    
-    if(idd == 1){
-        const outputFile = './saudio/output_'+index+'.mp3';
-        try {
-        await processAudio(card.sourceAudio, outputFile);
-            const convertfile = 'https://'+hostname+'/api/saudio/output_'+index+'.mp3';
-            return convertfile;
-        } catch (error) {
-        console.error('Failed to process audio for card ${index}', error);
-        }
-    }else{
-        const outputFile = './taudio/output_'+index+'.mp3';
-        try {
-        await processAudio(card.targetAudio, outputFile);
-        const convertfile = card.targetAudio = 'https://'+hostname+'/api/taudio/output_'+index+'.mp3';
-        return convertfile;
-        } catch (error) {
-        console.error('Failed to process audio for card ${index}:', error);
-        }
-    }
-  
-}
 
 
 
