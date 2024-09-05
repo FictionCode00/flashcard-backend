@@ -8,7 +8,7 @@ var jwt = require('jsonwebtoken');
 const userToken=(id)=>{
     return jwt.sign({ id:id}, process.env.SECRET_KEY);
 }
-
+ 
 exports.Signup = async (req, res, next) => {
     let { name, email,password,socialId } = req.body
     const hashPassword=  await hashingPassword(password)

@@ -20,10 +20,23 @@ function makeid(length) {
     return result;
 }
 
+function getUser(id) {
+    const user =  User.findById(id);
+    return user;
+    
+}
+
 
 exports.addFlashCard = async (req, res, next) => {
     try {
         const { sourceLang, targetLang, sourceText, targetText,setId,isprevimg,issourceAudio,istargetAudio } = req.body;
+        const uid = req.user.id;
+        const userRec = await User.findById(uid);
+       
+      
+        if(userRec != null && userRec.isAdmin != 1){
+             res.status(203).json({'message':'You are not authorized'});
+        }
         let settId = setId;
         if(settId == 'new'){
              const newFlashCardSet = new FlashCardSet({
@@ -53,7 +66,7 @@ exports.addFlashCard = async (req, res, next) => {
         if(istargetAudio != ''){
             targetAudioval = istargetAudio;
         }
-
+ 
         const newFlashcard = new flashCard({
             // createdBy: req.user.id, // Assuming auth middleware adds user to req
             sourceLang,
@@ -79,6 +92,13 @@ exports.addFlashCard = async (req, res, next) => {
 exports.editFlashCard = async (req, res, next) => {
     try {
         const { cardId,sourceLang, targetLang, sourceText, targetText,setId,isprevimg,issourceAudio,istargetAudio } = req.body;
+          const uid = req.user.id;
+        const userRec = await User.findById(uid);
+       
+      
+        if(userRec != null && userRec.isAdmin != 1){
+             res.status(203).json({'message':'You are not authorized'});
+        }
         let settId = setId;
         if(settId == 'new'){
              const newFlashCardSet = new FlashCardSet({
